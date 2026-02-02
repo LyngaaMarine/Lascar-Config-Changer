@@ -293,10 +293,12 @@ export class XModem {
       const packetData = paddedData.slice(offset, offset + XModem.PACKET_SIZE);
       
       // Build packet: SOH, packet#, ~packet#, 128 bytes data, checksum
+      // Packet numbers wrap at 256 (use modulo 256)
+      const wrappedPacketNum = packetNum & 0xFF;
       const packet = new Uint8Array(XModem.PACKET_SIZE + 4);
       packet[0] = XModem.SOH;
-      packet[1] = packetNum & 0xFF;
-      packet[2] = (255 - packetNum) & 0xFF;
+      packet[1] = wrappedPacketNum;
+      packet[2] = (255 - wrappedPacketNum) & 0xFF;
       packet.set(packetData, 3);
       packet[XModem.PACKET_SIZE + 3] = this.calculateChecksum(packetData);
       

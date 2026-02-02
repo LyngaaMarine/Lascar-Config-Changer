@@ -89,7 +89,7 @@ export function generateConfigFile(config: ConfigData): string {
     `BuInput ${config.buInput}`,
     `BuLabel1 ${config.buLabel1}`,
     `BuLabel2 ${config.buLabel2}`,
-    `AlmTxt1${config.almTxt1}`,
+    `AlmTxt1 ${config.almTxt1}`,
     `Flash ${config.flash}`
   ];
   return lines.join('\n') + '\n';
