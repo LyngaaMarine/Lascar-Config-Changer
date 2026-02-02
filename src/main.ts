@@ -3,16 +3,35 @@ import {
   defaultConfig,
   generateConfigFile,
   parseVoltageFromReading,
+  rgb565ToHtml,
+  htmlToRgb565,
+  parseA1col,
+  formatA1col,
 } from "./config";
 import { WebSerialDevice, XModem } from "./serial";
 import "./style.css";
 
 // Constants
 const DISCONNECT_DELAY_MS = 1000;
+const ARC_COLOR_COUNT = 21;
 
 // Global state
 let currentConfig: ConfigData = { ...defaultConfig };
 let device: WebSerialDevice | null = null;
+
+// Generate HTML for arc color input fields
+function generateArcColorInputs(colors: string[]): string {
+  let html = '';
+  for (let i = 0; i < ARC_COLOR_COUNT; i++) {
+    const color = colors[i] || 'ffff';
+    html += `
+      <div class="arc-color-item">
+        <label for="a1col_${i}">${i + 1}</label>
+        <input type="color" id="a1col_${i}" value="${rgb565ToHtml(color)}">
+      </div>`;
+  }
+  return html;
+}
 
 // Create the UI
 function createUI(): void {
@@ -121,38 +140,39 @@ function createUI(): void {
             </div>
           </div>
           
-          <h3>Color Settings (Hex)</h3>
+          <h3>Color Settings</h3>
           <div class="form-group-row">
             <div class="form-group">
               <label for="s1_0col">Color 0%</label>
-              <input type="text" id="s1_0col" value="${currentConfig.s1_0col}">
+              <input type="color" id="s1_0col" value="${rgb565ToHtml(currentConfig.s1_0col)}">
             </div>
             <div class="form-group">
               <label for="s1_50col">Color 50%</label>
-              <input type="text" id="s1_50col" value="${currentConfig.s1_50col}">
+              <input type="color" id="s1_50col" value="${rgb565ToHtml(currentConfig.s1_50col)}">
             </div>
             <div class="form-group">
               <label for="s1_100col">Color 100%</label>
-              <input type="text" id="s1_100col" value="${currentConfig.s1_100col}">
+              <input type="color" id="s1_100col" value="${rgb565ToHtml(currentConfig.s1_100col)}">
             </div>
           </div>
           <div class="form-group-row">
             <div class="form-group">
               <label for="l1col">Label Color</label>
-              <input type="text" id="l1col" value="${currentConfig.l1col}">
+              <input type="color" id="l1col" value="${rgb565ToHtml(currentConfig.l1col)}">
             </div>
             <div class="form-group">
               <label for="k1col">K1 Color</label>
-              <input type="text" id="k1col" value="${currentConfig.k1col}">
+              <input type="color" id="k1col" value="${rgb565ToHtml(currentConfig.k1col)}">
             </div>
             <div class="form-group">
               <label for="p1col">P1 Color</label>
-              <input type="text" id="p1col" value="${currentConfig.p1col}">
+              <input type="color" id="p1col" value="${rgb565ToHtml(currentConfig.p1col)}">
             </div>
           </div>
-          <div class="form-group">
-            <label for="a1col">A1 Color (Arc)</label>
-            <input type="text" id="a1col" value="${currentConfig.a1col}">
+          
+          <h3>Arc Colors (A1col) - 21 segments</h3>
+          <div class="arc-colors-grid">
+            ${generateArcColorInputs(parseA1col(currentConfig.a1col))}
           </div>
           
           <h3>Display Settings</h3>
@@ -251,13 +271,21 @@ function updateConfigFromForm(): void {
   currentConfig.scale1_50 = getInputValue("scale1_50");
   currentConfig.scale1_100 = getInputValue("scale1_100");
 
-  currentConfig.s1_0col = getInputValue("s1_0col");
-  currentConfig.s1_50col = getInputValue("s1_50col");
-  currentConfig.s1_100col = getInputValue("s1_100col");
-  currentConfig.l1col = getInputValue("l1col");
-  currentConfig.a1col = getInputValue("a1col");
-  currentConfig.k1col = getInputValue("k1col");
-  currentConfig.p1col = getInputValue("p1col");
+  // Convert color picker values to RGB565 format
+  currentConfig.s1_0col = htmlToRgb565(getInputValue("s1_0col"));
+  currentConfig.s1_50col = htmlToRgb565(getInputValue("s1_50col"));
+  currentConfig.s1_100col = htmlToRgb565(getInputValue("s1_100col"));
+  currentConfig.l1col = htmlToRgb565(getInputValue("l1col"));
+  currentConfig.k1col = htmlToRgb565(getInputValue("k1col"));
+  currentConfig.p1col = htmlToRgb565(getInputValue("p1col"));
+
+  // Collect arc colors from multiple input fields
+  const arcColors: string[] = [];
+  for (let i = 0; i < ARC_COLOR_COUNT; i++) {
+    const colorValue = getInputValue(`a1col_${i}`);
+    arcColors.push(htmlToRgb565(colorValue));
+  }
+  currentConfig.a1col = formatA1col(arcColors);
 
   // BLInput toggle: '1' for input 2, '0' for buttons
   const blInputToggle = document.getElementById("blInputToggle") as HTMLInputElement;

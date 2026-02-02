@@ -124,3 +124,52 @@ export function parseVoltageFromReading(reading: string): string | null {
   }
   return null;
 }
+
+// Convert RGB565 hex (4 chars like "f800") to HTML color (#RRGGBB)
+export function rgb565ToHtml(rgb565: string): string {
+  const value = parseInt(rgb565, 16);
+  // RGB565: RRRRRGGGGGGBBBBB
+  const r5 = (value >> 11) & 0x1F;
+  const g6 = (value >> 5) & 0x3F;
+  const b5 = value & 0x1F;
+  // Expand to 8-bit by shifting and filling low bits
+  const r8 = (r5 << 3) | (r5 >> 2);
+  const g8 = (g6 << 2) | (g6 >> 4);
+  const b8 = (b5 << 3) | (b5 >> 2);
+  return `#${r8.toString(16).padStart(2, '0')}${g8.toString(16).padStart(2, '0')}${b8.toString(16).padStart(2, '0')}`;
+}
+
+// Convert HTML color (#RRGGBB) to RGB565 hex (4 chars like "f800")
+export function htmlToRgb565(htmlColor: string): string {
+  const hex = htmlColor.replace('#', '');
+  const r8 = parseInt(hex.substring(0, 2), 16);
+  const g8 = parseInt(hex.substring(2, 4), 16);
+  const b8 = parseInt(hex.substring(4, 6), 16);
+  // Convert to 5-6-5 bit
+  const r5 = r8 >> 3;
+  const g6 = g8 >> 2;
+  const b5 = b8 >> 3;
+  const rgb565 = (r5 << 11) | (g6 << 5) | b5;
+  return rgb565.toString(16).padStart(4, '0');
+}
+
+// Parse a1col string into array of RGB565 colors (always returns 21 colors)
+export function parseA1col(a1col: string): string[] {
+  // Format: "f800 f800 f800 ... #" - space-separated colors ending with #
+  const colors = a1col.replace('#', '').trim().split(/\s+/).filter(c => c.length > 0);
+  // Ensure we always have exactly 21 colors, pad with white if needed
+  while (colors.length < 21) {
+    colors.push('ffff');
+  }
+  return colors.slice(0, 21);
+}
+
+// Format array of RGB565 colors into a1col string
+export function formatA1col(colors: string[]): string {
+  // Ensure we have exactly 21 colors, pad with white if needed
+  const paddedColors = [...colors];
+  while (paddedColors.length < 21) {
+    paddedColors.push('ffff');
+  }
+  return paddedColors.slice(0, 21).join(' ') + ' #';
+}
