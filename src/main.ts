@@ -1,12 +1,12 @@
 import type { ConfigData } from "./config";
 import {
   defaultConfig,
+  formatA1col,
   generateConfigFile,
-  parseVoltageFromReading,
-  rgb565ToHtml,
   htmlToRgb565,
   parseA1col,
-  formatA1col,
+  parseVoltageFromReading,
+  rgb565ToHtml,
 } from "./config";
 import { WebSerialDevice, XModem } from "./serial";
 import "./style.css";
@@ -21,9 +21,9 @@ let device: WebSerialDevice | null = null;
 
 // Generate HTML for arc color input fields
 function generateArcColorInputs(colors: string[]): string {
-  let html = '';
+  let html = "";
   for (let i = 0; i < ARC_COLOR_COUNT; i++) {
-    const color = colors[i] || 'ffff';
+    const color = colors[i] || "ffff";
     html += `
       <div class="arc-color-item">
         <label for="a1col_${i}">${i + 1}</label>
@@ -70,7 +70,7 @@ function createUI(): void {
           <div class="form-group toggle-group">
             <label class="toggle-label">
               <span>Backlight via Input 2</span>
-              <input type="checkbox" id="blInputToggle" ${currentConfig.blInput === '1' ? 'checked' : ''}>
+              <input type="checkbox" id="blInputToggle" ${currentConfig.blInput === "1" ? "checked" : ""}>
               <span class="toggle-slider"></span>
             </label>
             <small class="toggle-hint">When OFF, backlight is controlled via buttons</small>
@@ -138,34 +138,34 @@ function createUI(): void {
               <label for="scale1_100">Scale 100%</label>
               <input type="text" id="scale1_100" value="${currentConfig.scale1_100}">
             </div>
-          </div>
+            </div>
+            <div class="form-group-row">
+              <div class="form-group">
+                <label for="s1_0col">Color 0%</label>
+                <input type="color" id="s1_0col" value="${rgb565ToHtml(currentConfig.s1_0col)}">
+              </div>
+              <div class="form-group">
+                <label for="s1_50col">Color 50%</label>
+                <input type="color" id="s1_50col" value="${rgb565ToHtml(currentConfig.s1_50col)}">
+              </div>
+              <div class="form-group">
+                <label for="s1_100col">Color 100%</label>
+                <input type="color" id="s1_100col" value="${rgb565ToHtml(currentConfig.s1_100col)}">
+              </div>
+            </div>
           
           <h3>Color Settings</h3>
-          <div class="form-group-row">
-            <div class="form-group">
-              <label for="s1_0col">Color 0%</label>
-              <input type="color" id="s1_0col" value="${rgb565ToHtml(currentConfig.s1_0col)}">
-            </div>
-            <div class="form-group">
-              <label for="s1_50col">Color 50%</label>
-              <input type="color" id="s1_50col" value="${rgb565ToHtml(currentConfig.s1_50col)}">
-            </div>
-            <div class="form-group">
-              <label for="s1_100col">Color 100%</label>
-              <input type="color" id="s1_100col" value="${rgb565ToHtml(currentConfig.s1_100col)}">
-            </div>
-          </div>
           <div class="form-group-row">
             <div class="form-group">
               <label for="l1col">Label Color</label>
               <input type="color" id="l1col" value="${rgb565ToHtml(currentConfig.l1col)}">
             </div>
             <div class="form-group">
-              <label for="k1col">K1 Color</label>
+              <label for="k1col">Background Color</label>
               <input type="color" id="k1col" value="${rgb565ToHtml(currentConfig.k1col)}">
             </div>
             <div class="form-group">
-              <label for="p1col">P1 Color</label>
+              <label for="p1col">Needle Color</label>
               <input type="color" id="p1col" value="${rgb565ToHtml(currentConfig.p1col)}">
             </div>
           </div>
@@ -179,7 +179,7 @@ function createUI(): void {
           <div class="form-group toggle-group">
             <label class="toggle-label">
               <span>Enable Buttons</span>
-              <input type="checkbox" id="buInputToggle" ${currentConfig.buInput === '1' ? 'checked' : ''}>
+              <input type="checkbox" id="buInputToggle" ${currentConfig.buInput === "1" ? "checked" : ""}>
               <span class="toggle-slider"></span>
             </label>
           </div>
@@ -198,7 +198,7 @@ function createUI(): void {
           <div class="form-group toggle-group">
             <label class="toggle-label">
               <span>Enable Alarm Text</span>
-              <input type="checkbox" id="almTxtToggle" ${currentConfig.almTxt1 && currentConfig.almTxt1.trim() !== '' ? 'checked' : ''}>
+              <input type="checkbox" id="almTxtToggle" ${currentConfig.almTxt1 && currentConfig.almTxt1.trim() !== "" ? "checked" : ""}>
               <span class="toggle-slider"></span>
             </label>
           </div>
@@ -288,28 +288,34 @@ function updateConfigFromForm(): void {
   currentConfig.a1col = formatA1col(arcColors);
 
   // BLInput toggle: '1' for input 2, '0' for buttons
-  const blInputToggle = document.getElementById("blInputToggle") as HTMLInputElement;
-  currentConfig.blInput = blInputToggle.checked ? '1' : '0';
+  const blInputToggle = document.getElementById(
+    "blInputToggle",
+  ) as HTMLInputElement;
+  currentConfig.blInput = blInputToggle.checked ? "1" : "0";
 
   // BUInput toggle: '0' when buttons enabled (checked), '1' when disabled (inverted logic)
-  const buInputToggle = document.getElementById("buInputToggle") as HTMLInputElement;
-  currentConfig.buInput = buInputToggle.checked ? '0' : '1';
-  
+  const buInputToggle = document.getElementById(
+    "buInputToggle",
+  ) as HTMLInputElement;
+  currentConfig.buInput = buInputToggle.checked ? "0" : "1";
+
   // Only get button labels if buttons are enabled
   if (buInputToggle.checked) {
     currentConfig.buLabel1 = getInputValue("buLabel1");
     currentConfig.buLabel2 = getInputValue("buLabel2");
   } else {
-    currentConfig.buLabel1 = '';
-    currentConfig.buLabel2 = '';
+    currentConfig.buLabel1 = "";
+    currentConfig.buLabel2 = "";
   }
 
   // Alarm text toggle: if disabled, use empty string (just CR LF in output)
-  const almTxtToggle = document.getElementById("almTxtToggle") as HTMLInputElement;
+  const almTxtToggle = document.getElementById(
+    "almTxtToggle",
+  ) as HTMLInputElement;
   if (almTxtToggle.checked) {
     currentConfig.almTxt1 = getInputValue("almTxt1");
   } else {
-    currentConfig.almTxt1 = '';
+    currentConfig.almTxt1 = "";
   }
 }
 
@@ -318,7 +324,7 @@ function formatVoltageForConfig(value: string): string {
   const num = parseFloat(value) || 0;
   // Ensure we get leading zeros for values < 10 (e.g., 3.33 -> 03.33)
   const fixed = num.toFixed(2);
-  return fixed.padStart(5, '0');
+  return fixed.padStart(5, "0");
 }
 
 // Format percent for Cal1 as X%
@@ -330,7 +336,7 @@ function formatPercentForCal1(value: string): string {
 // Format percent for Cal2 as 3-digit number (e.g., 003, 100)
 function formatPercentForCal2(value: string): string {
   const num = parseInt(value, 10) || 0;
-  return num.toString().padStart(3, '0');
+  return num.toString().padStart(3, "0");
 }
 
 function getInputValue(id: string): string {
@@ -455,7 +461,10 @@ function setupEventListeners(): void {
     });
 
   // Helper function to read voltage and update display
-  async function readAndGetVoltage(): Promise<{ rdg1: string | null; rdg2: string | null }> {
+  async function readAndGetVoltage(): Promise<{
+    rdg1: string | null;
+    rdg2: string | null;
+  }> {
     if (!device) return { rdg1: null, rdg2: null };
 
     const rdg1Display = document.getElementById("rdg1Display")!;
@@ -471,7 +480,7 @@ function setupEventListeners(): void {
 
       lastRdg1Voltage = parseVoltageFromReading(readings.rdg1);
       lastRdg2Voltage = parseVoltageFromReading(readings.rdg2);
-      
+
       return { rdg1: lastRdg1Voltage, rdg2: lastRdg2Voltage };
     } else {
       rdg1Display.textContent = "Error";
@@ -481,40 +490,55 @@ function setupEventListeners(): void {
   }
 
   // Calibration buttons - read from device when pressed
-  document.getElementById("setCal1HiBtn")!.addEventListener("click", async () => {
-    const { rdg1 } = await readAndGetVoltage();
-    if (rdg1) {
-      (document.getElementById("cal1HiVoltage") as HTMLInputElement).value = rdg1;
-    }
-  });
+  document
+    .getElementById("setCal1HiBtn")!
+    .addEventListener("click", async () => {
+      const { rdg1 } = await readAndGetVoltage();
+      if (rdg1) {
+        (document.getElementById("cal1HiVoltage") as HTMLInputElement).value =
+          rdg1;
+      }
+    });
 
-  document.getElementById("setCal1MiBtn")!.addEventListener("click", async () => {
-    const { rdg1 } = await readAndGetVoltage();
-    if (rdg1) {
-      (document.getElementById("cal1MiVoltage") as HTMLInputElement).value = rdg1;
-    }
-  });
+  document
+    .getElementById("setCal1MiBtn")!
+    .addEventListener("click", async () => {
+      const { rdg1 } = await readAndGetVoltage();
+      if (rdg1) {
+        (document.getElementById("cal1MiVoltage") as HTMLInputElement).value =
+          rdg1;
+      }
+    });
 
-  document.getElementById("setCal1LoBtn")!.addEventListener("click", async () => {
-    const { rdg1 } = await readAndGetVoltage();
-    if (rdg1) {
-      (document.getElementById("cal1LoVoltage") as HTMLInputElement).value = rdg1;
-    }
-  });
+  document
+    .getElementById("setCal1LoBtn")!
+    .addEventListener("click", async () => {
+      const { rdg1 } = await readAndGetVoltage();
+      if (rdg1) {
+        (document.getElementById("cal1LoVoltage") as HTMLInputElement).value =
+          rdg1;
+      }
+    });
 
-  document.getElementById("setCal2HiBtn")!.addEventListener("click", async () => {
-    const { rdg2 } = await readAndGetVoltage();
-    if (rdg2) {
-      (document.getElementById("cal2HiVoltage") as HTMLInputElement).value = rdg2;
-    }
-  });
+  document
+    .getElementById("setCal2HiBtn")!
+    .addEventListener("click", async () => {
+      const { rdg2 } = await readAndGetVoltage();
+      if (rdg2) {
+        (document.getElementById("cal2HiVoltage") as HTMLInputElement).value =
+          rdg2;
+      }
+    });
 
-  document.getElementById("setCal2LoBtn")!.addEventListener("click", async () => {
-    const { rdg2 } = await readAndGetVoltage();
-    if (rdg2) {
-      (document.getElementById("cal2LoVoltage") as HTMLInputElement).value = rdg2;
-    }
-  });
+  document
+    .getElementById("setCal2LoBtn")!
+    .addEventListener("click", async () => {
+      const { rdg2 } = await readAndGetVoltage();
+      if (rdg2) {
+        (document.getElementById("cal2LoVoltage") as HTMLInputElement).value =
+          rdg2;
+      }
+    });
 
   // Preview button
   document.getElementById("previewBtn")!.addEventListener("click", () => {
@@ -597,11 +621,19 @@ function setupEventListeners(): void {
         device = null;
       }
       setConnectionStatus(false);
-      showStatus("uploadStatus", "Configuration uploaded successfully! Device disconnected.", "success");
+      showStatus(
+        "uploadStatus",
+        "Configuration uploaded successfully! Device disconnected.",
+        "success",
+      );
 
       // Prompt user to reconnect after 1 second
       setTimeout(() => {
-        showStatus("uploadStatus", "Ready to connect again. Click 'Connect to Device' to reconnect.", "info");
+        showStatus(
+          "uploadStatus",
+          "Ready to connect again. Click 'Connect to Device' to reconnect.",
+          "info",
+        );
         // Trigger click on connect button to prompt for device selection
         document.getElementById("connectBtn")?.click();
       }, DISCONNECT_DELAY_MS);
@@ -622,9 +654,15 @@ function setupEventListeners(): void {
   });
 
   // Toggle event listeners for dynamic UI updates
-  const blInputToggle = document.getElementById("blInputToggle") as HTMLInputElement;
-  const buInputToggle = document.getElementById("buInputToggle") as HTMLInputElement;
-  const almTxtToggle = document.getElementById("almTxtToggle") as HTMLInputElement;
+  const blInputToggle = document.getElementById(
+    "blInputToggle",
+  ) as HTMLInputElement;
+  const buInputToggle = document.getElementById(
+    "buInputToggle",
+  ) as HTMLInputElement;
+  const almTxtToggle = document.getElementById(
+    "almTxtToggle",
+  ) as HTMLInputElement;
 
   // Function to update visibility based on toggle states
   function updateToggleVisibility(): void {
