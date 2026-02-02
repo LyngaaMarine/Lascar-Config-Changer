@@ -570,6 +570,13 @@ function setupEventListeners(): void {
       }
       setConnectionStatus(false);
       showStatus("uploadStatus", "Configuration uploaded successfully! Device disconnected.", "success");
+
+      // Prompt user to reconnect after 1 second
+      setTimeout(() => {
+        showStatus("uploadStatus", "Ready to connect again. Click 'Connect to Device' to reconnect.", "info");
+        // Trigger click on connect button to prompt for device selection
+        document.getElementById("connectBtn")?.click();
+      }, DISCONNECT_DELAY_MS);
     } catch (error) {
       showStatus("uploadStatus", `Upload failed: ${error}`, "error");
     }
