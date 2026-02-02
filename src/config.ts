@@ -92,7 +92,19 @@ export function generateConfigFile(config: ConfigData): string {
     `AlmTxt1 ${config.almTxt1}`,
     `Flash ${config.flash}`
   ];
-  return lines.join('\n') + '\n';
+  
+  // Join lines with newlines and add a trailing newline
+  let content = lines.join('\n') + '\n';
+  
+  // Pad to 1024 bytes with spaces (required for XMODEM-1K transfer)
+  const targetSize = 1024;
+  if (content.length < targetSize) {
+    content = content.padEnd(targetSize, ' ');
+  } else if (content.length > targetSize) {
+    console.warn(`Config file size (${content.length} bytes) exceeds ${targetSize} bytes limit`);
+  }
+  
+  return content;
 }
 
 export function formatVoltage(voltage: number): string {
