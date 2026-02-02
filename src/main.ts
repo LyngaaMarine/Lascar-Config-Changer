@@ -38,7 +38,7 @@ function generateArcColorInputs(colors: string[]): string {
 function createUI(): void {
   document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div class="container">
-      <h1>Panel Pilot SGD Config Uploader</h1>
+      <h1>Lascar Config Changer</h1>
       
       <div class="section import-export-section">
         <h2>Import / Export Configuration</h2>
@@ -406,26 +406,29 @@ function setupEventListeners(): void {
   });
 
   // File input change - handle import
-  document.getElementById("importFileInput")!.addEventListener("change", async (e) => {
-    const input = e.target as HTMLInputElement;
-    const file = input.files?.[0];
-    if (!file) return;
+  document
+    .getElementById("importFileInput")!
+    .addEventListener("change", async (e) => {
+      const input = e.target as HTMLInputElement;
+      const file = input.files?.[0];
+      if (!file) return;
 
-    try {
-      const content = await file.text();
-      currentConfig = parseConfigFile(content);
-      // Re-create UI to reflect imported config
-      createUI();
-      showStatus("importStatus", `Imported: ${file.name}`, "success");
-      document.getElementById("importStatus")!.style.display = "block";
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      showStatus("importStatus", `Import failed: ${errorMessage}`, "error");
-      document.getElementById("importStatus")!.style.display = "block";
-    }
-    // Reset the input so the same file can be imported again
-    input.value = "";
-  });
+      try {
+        const content = await file.text();
+        currentConfig = parseConfigFile(content);
+        // Re-create UI to reflect imported config
+        createUI();
+        showStatus("importStatus", `Imported: ${file.name}`, "success");
+        document.getElementById("importStatus")!.style.display = "block";
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        showStatus("importStatus", `Import failed: ${errorMessage}`, "error");
+        document.getElementById("importStatus")!.style.display = "block";
+      }
+      // Reset the input so the same file can be imported again
+      input.value = "";
+    });
 
   // Export button - download config file
   document.getElementById("exportBtn")!.addEventListener("click", () => {
@@ -435,7 +438,7 @@ function setupEventListeners(): void {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "Configuration.cfg";
+    a.download = "Configuration.txt";
     a.click();
     URL.revokeObjectURL(url);
   });
@@ -612,7 +615,7 @@ function setupEventListeners(): void {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = "Configuration.cfg";
+    a.download = "Configuration.txt";
     a.click();
     URL.revokeObjectURL(url);
   });
