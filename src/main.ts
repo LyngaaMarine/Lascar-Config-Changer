@@ -198,7 +198,7 @@ function createUI(): void {
         <div class="button-group">
           <button id="previewBtn" class="btn btn-secondary">Preview Config File</button>
           <button id="downloadBtn" class="btn btn-secondary">Download Config File</button>
-          <button id="uploadBtn" class="btn btn-primary" disabled>Upload to Device (XMODEM)</button>
+          <button id="uploadBtn" class="btn btn-primary" disabled>Upload to Device (XMODEM-1K)</button>
         </div>
         <div id="uploadProgress" class="progress-bar" style="display: none;">
           <div id="progressFill" class="progress-fill"></div>
@@ -454,15 +454,12 @@ function setupEventListeners(): void {
       // Wait for 'XMODEM' response indicating transfer started
       await device.waitFor('XMODEM', 5000);
       
-      // Clear buffer to ensure we detect the actual 'C' command, not a 'C' in the message text
+      // Clear buffer to ensure XModem class can detect the 'C' command properly
       device.clearBuffer();
       
-      // Wait for 'C' character indicating ready to receive
-      await device.waitFor('C', 5000);
+      showStatus('uploadStatus', 'Sending configuration via XMODEM-1K...', 'info');
       
-      showStatus('uploadStatus', 'Sending configuration via XMODEM...', 'info');
-      
-      // Send file via XMODEM
+      // Send file via XMODEM-1K (XModem class will wait for 'C' from receiver)
       const xmodem = new XModem(device);
       await xmodem.send(configContent, (percent) => {
         progressFill.style.width = `${percent}%`;
