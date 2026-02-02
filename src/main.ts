@@ -1,7 +1,11 @@
-import './style.css'
-import type { ConfigData } from './config'
-import { defaultConfig, generateConfigFile, parseVoltageFromReading } from './config'
-import { WebSerialDevice, XModem } from './serial'
+import type { ConfigData } from "./config";
+import {
+  defaultConfig,
+  generateConfigFile,
+  parseVoltageFromReading,
+} from "./config";
+import { WebSerialDevice, XModem } from "./serial";
+import "./style.css";
 
 // Global state
 let currentConfig: ConfigData = { ...defaultConfig };
@@ -9,7 +13,7 @@ let device: WebSerialDevice | null = null;
 
 // Create the UI
 function createUI(): void {
-  document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
+  document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div class="container">
       <h1>Panel Pilot SGD Config Uploader</h1>
       
@@ -27,11 +31,11 @@ function createUI(): void {
         <button id="readVoltageBtn" class="btn btn-primary" disabled>Read Voltage (x)</button>
         <div class="voltage-display">
           <div class="voltage-card">
-            <h3>Rdg1 (Pitch)</h3>
+            <h3>Input 1</h3>
             <div id="rdg1Display" class="voltage-value">--</div>
           </div>
           <div class="voltage-card">
-            <h3>Rdg2 (Brightness)</h3>
+            <h3>Input 2 (Brightness)</h3>
             <div id="rdg2Display" class="voltage-value">--</div>
           </div>
         </div>
@@ -69,21 +73,21 @@ function createUI(): void {
               <input type="text" id="cal1HiVoltage" value="${currentConfig.cal1Hi.voltage}" placeholder="Voltage">
               <input type="text" id="cal1HiValue" value="${currentConfig.cal1Hi.value}" placeholder="Value">
               <input type="text" id="cal1HiPercent" value="${currentConfig.cal1Hi.percent}" placeholder="Percent">
-              <button type="button" id="setCal1HiBtn" class="btn btn-small" disabled>Set from Rdg1</button>
+              <button type="button" id="setCal1HiBtn" class="btn btn-small" disabled>Set from Input 1</button>
             </div>
             <div class="cal-row">
               <span class="cal-label">Zero Pitch (Cal1Mi)</span>
               <input type="text" id="cal1MiVoltage" value="${currentConfig.cal1Mi.voltage}" placeholder="Voltage">
               <input type="text" id="cal1MiValue" value="${currentConfig.cal1Mi.value}" placeholder="Value">
               <input type="text" id="cal1MiPercent" value="${currentConfig.cal1Mi.percent}" placeholder="Percent">
-              <button type="button" id="setCal1MiBtn" class="btn btn-small" disabled>Set from Rdg1</button>
+              <button type="button" id="setCal1MiBtn" class="btn btn-small" disabled>Set from Input 1</button>
             </div>
             <div class="cal-row">
               <span class="cal-label">Min Pitch (Cal1Lo)</span>
               <input type="text" id="cal1LoVoltage" value="${currentConfig.cal1Lo.voltage}" placeholder="Voltage">
               <input type="text" id="cal1LoValue" value="${currentConfig.cal1Lo.value}" placeholder="Value">
               <input type="text" id="cal1LoPercent" value="${currentConfig.cal1Lo.percent}" placeholder="Percent">
-              <button type="button" id="setCal1LoBtn" class="btn btn-small" disabled>Set from Rdg1</button>
+              <button type="button" id="setCal1LoBtn" class="btn btn-small" disabled>Set from Input 1</button>
             </div>
           </div>
           
@@ -93,13 +97,13 @@ function createUI(): void {
               <span class="cal-label">Brightness High (Cal2Hi)</span>
               <input type="text" id="cal2HiVoltage" value="${currentConfig.cal2Hi.voltage}" placeholder="Voltage">
               <input type="text" id="cal2HiPercent" value="${currentConfig.cal2Hi.percent}" placeholder="Percent">
-              <button type="button" id="setCal2HiBtn" class="btn btn-small" disabled>Set from Rdg2</button>
+              <button type="button" id="setCal2HiBtn" class="btn btn-small" disabled>Set from Input 2</button>
             </div>
             <div class="cal-row">
               <span class="cal-label">Brightness Low (Cal2Lo)</span>
               <input type="text" id="cal2LoVoltage" value="${currentConfig.cal2Lo.voltage}" placeholder="Voltage">
               <input type="text" id="cal2LoPercent" value="${currentConfig.cal2Lo.percent}" placeholder="Percent">
-              <button type="button" id="setCal2LoBtn" class="btn btn-small" disabled>Set from Rdg2</button>
+              <button type="button" id="setCal2LoBtn" class="btn btn-small" disabled>Set from Input 2</button>
             </div>
           </div>
           
@@ -198,7 +202,7 @@ function createUI(): void {
         <div class="button-group">
           <button id="previewBtn" class="btn btn-secondary">Preview Config File</button>
           <button id="downloadBtn" class="btn btn-secondary">Download Config File</button>
-          <button id="uploadBtn" class="btn btn-primary" disabled>Upload to Device (XMODEM)</button>
+          <button id="uploadBtn" class="btn btn-primary" disabled>Upload to Device (XMODEM-1K)</button>
         </div>
         <div id="uploadProgress" class="progress-bar" style="display: none;">
           <div id="progressFill" class="progress-fill"></div>
@@ -215,93 +219,103 @@ function createUI(): void {
       </div>
     </div>
   `;
-  
+
   setupEventListeners();
 }
 
 function updateConfigFromForm(): void {
-  currentConfig.versUsr = getInputValue('versUsr');
-  currentConfig.dateUsr = getInputValue('dateUsr');
-  currentConfig.fileUsr = getInputValue('fileUsr');
-  currentConfig.label1 = getInputValue('label1');
-  
+  currentConfig.versUsr = getInputValue("versUsr");
+  currentConfig.dateUsr = getInputValue("dateUsr");
+  currentConfig.fileUsr = getInputValue("fileUsr");
+  currentConfig.label1 = getInputValue("label1");
+
   currentConfig.cal1Hi = {
-    voltage: getInputValue('cal1HiVoltage'),
-    value: getInputValue('cal1HiValue'),
-    percent: getInputValue('cal1HiPercent')
+    voltage: getInputValue("cal1HiVoltage"),
+    value: getInputValue("cal1HiValue"),
+    percent: getInputValue("cal1HiPercent"),
   };
   currentConfig.cal1Mi = {
-    voltage: getInputValue('cal1MiVoltage'),
-    value: getInputValue('cal1MiValue'),
-    percent: getInputValue('cal1MiPercent')
+    voltage: getInputValue("cal1MiVoltage"),
+    value: getInputValue("cal1MiValue"),
+    percent: getInputValue("cal1MiPercent"),
   };
   currentConfig.cal1Lo = {
-    voltage: getInputValue('cal1LoVoltage'),
-    value: getInputValue('cal1LoValue'),
-    percent: getInputValue('cal1LoPercent')
+    voltage: getInputValue("cal1LoVoltage"),
+    value: getInputValue("cal1LoValue"),
+    percent: getInputValue("cal1LoPercent"),
   };
-  
+
   currentConfig.cal2Hi = {
-    voltage: getInputValue('cal2HiVoltage'),
-    percent: getInputValue('cal2HiPercent')
+    voltage: getInputValue("cal2HiVoltage"),
+    percent: getInputValue("cal2HiPercent"),
   };
   currentConfig.cal2Lo = {
-    voltage: getInputValue('cal2LoVoltage'),
-    percent: getInputValue('cal2LoPercent')
+    voltage: getInputValue("cal2LoVoltage"),
+    percent: getInputValue("cal2LoPercent"),
   };
-  
-  currentConfig.scale1_0 = getInputValue('scale1_0');
-  currentConfig.scale1_50 = getInputValue('scale1_50');
-  currentConfig.scale1_100 = getInputValue('scale1_100');
-  
-  currentConfig.s1_0col = getInputValue('s1_0col');
-  currentConfig.s1_50col = getInputValue('s1_50col');
-  currentConfig.s1_100col = getInputValue('s1_100col');
-  currentConfig.l1col = getInputValue('l1col');
-  currentConfig.a1col = getInputValue('a1col');
-  currentConfig.k1col = getInputValue('k1col');
-  currentConfig.p1col = getInputValue('p1col');
-  
-  currentConfig.blPer = getInputValue('blPer');
-  currentConfig.blInput = getInputValue('blInput');
-  currentConfig.buInput = getInputValue('buInput');
-  currentConfig.buLabel1 = getInputValue('buLabel1');
-  currentConfig.buLabel2 = getInputValue('buLabel2');
-  currentConfig.almTxt1 = getInputValue('almTxt1');
-  currentConfig.flash = getInputValue('flash');
+
+  currentConfig.scale1_0 = getInputValue("scale1_0");
+  currentConfig.scale1_50 = getInputValue("scale1_50");
+  currentConfig.scale1_100 = getInputValue("scale1_100");
+
+  currentConfig.s1_0col = getInputValue("s1_0col");
+  currentConfig.s1_50col = getInputValue("s1_50col");
+  currentConfig.s1_100col = getInputValue("s1_100col");
+  currentConfig.l1col = getInputValue("l1col");
+  currentConfig.a1col = getInputValue("a1col");
+  currentConfig.k1col = getInputValue("k1col");
+  currentConfig.p1col = getInputValue("p1col");
+
+  currentConfig.blPer = getInputValue("blPer");
+  currentConfig.blInput = getInputValue("blInput");
+  currentConfig.buInput = getInputValue("buInput");
+  currentConfig.buLabel1 = getInputValue("buLabel1");
+  currentConfig.buLabel2 = getInputValue("buLabel2");
+  currentConfig.almTxt1 = getInputValue("almTxt1");
+  currentConfig.flash = getInputValue("flash");
 }
 
 function getInputValue(id: string): string {
-  return (document.getElementById(id) as HTMLInputElement)?.value || '';
+  return (document.getElementById(id) as HTMLInputElement)?.value || "";
 }
 
 function setConnectionStatus(connected: boolean): void {
-  const statusEl = document.getElementById('connectionStatus')!;
-  const connectBtn = document.getElementById('connectBtn') as HTMLButtonElement;
-  const disconnectBtn = document.getElementById('disconnectBtn') as HTMLButtonElement;
-  const readVoltageBtn = document.getElementById('readVoltageBtn') as HTMLButtonElement;
-  const uploadBtn = document.getElementById('uploadBtn') as HTMLButtonElement;
-  
-  const calButtons = ['setCal1HiBtn', 'setCal1MiBtn', 'setCal1LoBtn', 'setCal2HiBtn', 'setCal2LoBtn'];
-  
+  const statusEl = document.getElementById("connectionStatus")!;
+  const connectBtn = document.getElementById("connectBtn") as HTMLButtonElement;
+  const disconnectBtn = document.getElementById(
+    "disconnectBtn",
+  ) as HTMLButtonElement;
+  const readVoltageBtn = document.getElementById(
+    "readVoltageBtn",
+  ) as HTMLButtonElement;
+  const uploadBtn = document.getElementById("uploadBtn") as HTMLButtonElement;
+
+  const calButtons = [
+    "setCal1HiBtn",
+    "setCal1MiBtn",
+    "setCal1LoBtn",
+    "setCal2HiBtn",
+    "setCal2LoBtn",
+  ];
+
   if (connected) {
-    statusEl.textContent = 'Connected';
-    statusEl.className = 'status status-connected';
+    statusEl.textContent = "Connected";
+    statusEl.className = "status status-connected";
     connectBtn.disabled = true;
     disconnectBtn.disabled = false;
     readVoltageBtn.disabled = false;
     uploadBtn.disabled = false;
-    calButtons.forEach(id => {
+    calButtons.forEach((id) => {
       (document.getElementById(id) as HTMLButtonElement).disabled = false;
     });
   } else {
-    statusEl.textContent = 'Disconnected';
-    statusEl.className = 'status status-disconnected';
+    statusEl.textContent = "Disconnected";
+    statusEl.className = "status status-disconnected";
     connectBtn.disabled = false;
     disconnectBtn.disabled = true;
     readVoltageBtn.disabled = true;
     uploadBtn.disabled = true;
-    calButtons.forEach(id => {
+    calButtons.forEach((id) => {
       (document.getElementById(id) as HTMLButtonElement).disabled = true;
     });
   }
@@ -312,176 +326,199 @@ let lastRdg2Voltage: string | null = null;
 
 function setupEventListeners(): void {
   // Connect button
-  document.getElementById('connectBtn')!.addEventListener('click', async () => {
+  document.getElementById("connectBtn")!.addEventListener("click", async () => {
     try {
       device = new WebSerialDevice();
-      
+
       // Set up data callback for raw output
       device.setOnDataCallback((data) => {
-        const rawOutput = document.getElementById('rawOutput')!;
+        const rawOutput = document.getElementById("rawOutput")!;
         rawOutput.textContent += data;
         rawOutput.scrollTop = rawOutput.scrollHeight;
       });
-      
+
       await device.connect(9600);
-      
+
       // Verify device
       const verified = await device.verifyDevice();
       if (verified) {
         setConnectionStatus(true);
-        showStatus('uploadStatus', 'Device connected and verified!', 'success');
+        showStatus("uploadStatus", "Device connected and verified!", "success");
       } else {
         await device.disconnect();
         device = null;
-        showStatus('uploadStatus', 'Device verification failed. Not a compatible device.', 'error');
+        showStatus(
+          "uploadStatus",
+          "Device verification failed. Not a compatible device.",
+          "error",
+        );
       }
     } catch (error) {
-      showStatus('uploadStatus', `Connection failed: ${error}`, 'error');
+      showStatus("uploadStatus", `Connection failed: ${error}`, "error");
     }
   });
-  
+
   // Disconnect button
-  document.getElementById('disconnectBtn')!.addEventListener('click', async () => {
-    if (device) {
-      await device.disconnect();
-      device = null;
-    }
-    setConnectionStatus(false);
-    showStatus('uploadStatus', 'Disconnected', 'info');
-  });
-  
+  document
+    .getElementById("disconnectBtn")!
+    .addEventListener("click", async () => {
+      if (device) {
+        await device.disconnect();
+        device = null;
+      }
+      setConnectionStatus(false);
+      showStatus("uploadStatus", "Disconnected", "info");
+    });
+
   // Read voltage button
-  document.getElementById('readVoltageBtn')!.addEventListener('click', async () => {
-    if (!device) return;
-    
-    const rdg1Display = document.getElementById('rdg1Display')!;
-    const rdg2Display = document.getElementById('rdg2Display')!;
-    
-    rdg1Display.textContent = 'Reading...';
-    rdg2Display.textContent = 'Reading...';
-    
-    const readings = await device.readVoltage();
-    if (readings) {
-      rdg1Display.innerHTML = formatVoltageDisplay(readings.rdg1);
-      rdg2Display.innerHTML = formatVoltageDisplay(readings.rdg2);
-      
-      // Store parsed voltages for calibration buttons
-      lastRdg1Voltage = parseVoltageFromReading(readings.rdg1);
-      lastRdg2Voltage = parseVoltageFromReading(readings.rdg2);
-    } else {
-      rdg1Display.textContent = 'Error';
-      rdg2Display.textContent = 'Error';
-    }
-  });
-  
+  document
+    .getElementById("readVoltageBtn")!
+    .addEventListener("click", async () => {
+      if (!device) return;
+
+      const rdg1Display = document.getElementById("rdg1Display")!;
+      const rdg2Display = document.getElementById("rdg2Display")!;
+
+      rdg1Display.textContent = "Reading...";
+      rdg2Display.textContent = "Reading...";
+
+      const readings = await device.readVoltage();
+      if (readings) {
+        rdg1Display.innerHTML = formatVoltageDisplay(readings.rdg1);
+        rdg2Display.innerHTML = formatVoltageDisplay(readings.rdg2);
+
+        // Store parsed voltages for calibration buttons
+        lastRdg1Voltage = parseVoltageFromReading(readings.rdg1);
+        lastRdg2Voltage = parseVoltageFromReading(readings.rdg2);
+      } else {
+        rdg1Display.textContent = "Error";
+        rdg2Display.textContent = "Error";
+      }
+    });
+
   // Calibration buttons
-  document.getElementById('setCal1HiBtn')!.addEventListener('click', () => {
+  document.getElementById("setCal1HiBtn")!.addEventListener("click", () => {
     if (lastRdg1Voltage) {
-      (document.getElementById('cal1HiVoltage') as HTMLInputElement).value = lastRdg1Voltage;
+      (document.getElementById("cal1HiVoltage") as HTMLInputElement).value =
+        lastRdg1Voltage;
     }
   });
-  
-  document.getElementById('setCal1MiBtn')!.addEventListener('click', () => {
+
+  document.getElementById("setCal1MiBtn")!.addEventListener("click", () => {
     if (lastRdg1Voltage) {
-      (document.getElementById('cal1MiVoltage') as HTMLInputElement).value = lastRdg1Voltage;
+      (document.getElementById("cal1MiVoltage") as HTMLInputElement).value =
+        lastRdg1Voltage;
     }
   });
-  
-  document.getElementById('setCal1LoBtn')!.addEventListener('click', () => {
+
+  document.getElementById("setCal1LoBtn")!.addEventListener("click", () => {
     if (lastRdg1Voltage) {
-      (document.getElementById('cal1LoVoltage') as HTMLInputElement).value = lastRdg1Voltage;
+      (document.getElementById("cal1LoVoltage") as HTMLInputElement).value =
+        lastRdg1Voltage;
     }
   });
-  
-  document.getElementById('setCal2HiBtn')!.addEventListener('click', () => {
+
+  document.getElementById("setCal2HiBtn")!.addEventListener("click", () => {
     if (lastRdg2Voltage) {
-      (document.getElementById('cal2HiVoltage') as HTMLInputElement).value = lastRdg2Voltage;
+      (document.getElementById("cal2HiVoltage") as HTMLInputElement).value =
+        lastRdg2Voltage;
     }
   });
-  
-  document.getElementById('setCal2LoBtn')!.addEventListener('click', () => {
+
+  document.getElementById("setCal2LoBtn")!.addEventListener("click", () => {
     if (lastRdg2Voltage) {
-      (document.getElementById('cal2LoVoltage') as HTMLInputElement).value = lastRdg2Voltage;
+      (document.getElementById("cal2LoVoltage") as HTMLInputElement).value =
+        lastRdg2Voltage;
     }
   });
-  
+
   // Preview button
-  document.getElementById('previewBtn')!.addEventListener('click', () => {
+  document.getElementById("previewBtn")!.addEventListener("click", () => {
     updateConfigFromForm();
     const configContent = generateConfigFile(currentConfig);
-    document.getElementById('configPreview')!.textContent = configContent;
-    document.getElementById('previewModal')!.style.display = 'flex';
+    document.getElementById("configPreview")!.textContent = configContent;
+    document.getElementById("previewModal")!.style.display = "flex";
   });
-  
+
   // Close preview button
-  document.getElementById('closePreviewBtn')!.addEventListener('click', () => {
-    document.getElementById('previewModal')!.style.display = 'none';
+  document.getElementById("closePreviewBtn")!.addEventListener("click", () => {
+    document.getElementById("previewModal")!.style.display = "none";
   });
-  
+
   // Download button
-  document.getElementById('downloadBtn')!.addEventListener('click', () => {
+  document.getElementById("downloadBtn")!.addEventListener("click", () => {
     updateConfigFromForm();
     const configContent = generateConfigFile(currentConfig);
-    const blob = new Blob([configContent], { type: 'text/plain' });
+    const blob = new Blob([configContent], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
+    const a = document.createElement("a");
     a.href = url;
-    a.download = 'Configuration.cfg';
+    a.download = "Configuration.cfg";
     a.click();
     URL.revokeObjectURL(url);
   });
-  
+
   // Upload button
-  document.getElementById('uploadBtn')!.addEventListener('click', async () => {
+  document.getElementById("uploadBtn")!.addEventListener("click", async () => {
     if (!device) return;
-    
+
     updateConfigFromForm();
     const configContent = generateConfigFile(currentConfig);
-    
-    const progressBar = document.getElementById('uploadProgress')!;
-    const progressFill = document.getElementById('progressFill')!;
-    
-    progressBar.style.display = 'block';
-    progressFill.style.width = '0%';
-    
+
+    const progressBar = document.getElementById("uploadProgress")!;
+    const progressFill = document.getElementById("progressFill")!;
+
+    progressBar.style.display = "block";
+    progressFill.style.width = "0%";
+
     try {
-      showStatus('uploadStatus', 'Initiating XMODEM transfer...', 'info');
-      
+      showStatus("uploadStatus", "Initiating XMODEM transfer...", "info");
+
       // Send 's' to start config mode
       device.clearBuffer();
-      await device.send('s');
-      
-      // Wait for 'XC' response
-      await device.waitFor('XC', 5000);
-      
-      showStatus('uploadStatus', 'Sending configuration via XMODEM...', 'info');
-      
-      // Send file via XMODEM
+      await device.send("s");
+
+      // Wait for 'XMODEM' response indicating transfer started
+      await device.waitFor("XMODEM", 5000);
+
+      // Clear buffer to ensure XModem class can detect the 'C' command properly
+      device.clearBuffer();
+
+      showStatus(
+        "uploadStatus",
+        "Sending configuration via XMODEM-1K...",
+        "info",
+      );
+
+      // Send file via XMODEM-1K (XModem class will wait for 'C' from receiver)
       const xmodem = new XModem(device);
       await xmodem.send(configContent, (percent) => {
         progressFill.style.width = `${percent}%`;
       });
-      
+
       // Wait a moment then send 'm' to complete
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      await device.send('m');
-      
-      progressFill.style.width = '100%';
-      showStatus('uploadStatus', 'Configuration uploaded successfully!', 'success');
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await device.send("m");
+
+      progressFill.style.width = "100%";
+      showStatus(
+        "uploadStatus",
+        "Configuration uploaded successfully!",
+        "success",
+      );
     } catch (error) {
-      showStatus('uploadStatus', `Upload failed: ${error}`, 'error');
+      showStatus("uploadStatus", `Upload failed: ${error}`, "error");
     }
-    
+
     setTimeout(() => {
-      progressBar.style.display = 'none';
+      progressBar.style.display = "none";
     }, 3000);
   });
-  
+
   // Close modal when clicking outside
-  document.getElementById('previewModal')!.addEventListener('click', (e) => {
-    if (e.target === document.getElementById('previewModal')) {
-      document.getElementById('previewModal')!.style.display = 'none';
+  document.getElementById("previewModal")!.addEventListener("click", (e) => {
+    if (e.target === document.getElementById("previewModal")) {
+      document.getElementById("previewModal")!.style.display = "none";
     }
   });
 }
@@ -494,7 +531,11 @@ function formatVoltageDisplay(reading: string): string {
   return reading;
 }
 
-function showStatus(elementId: string, message: string, type: 'success' | 'error' | 'info'): void {
+function showStatus(
+  elementId: string,
+  message: string,
+  type: "success" | "error" | "info",
+): void {
   const el = document.getElementById(elementId)!;
   el.textContent = message;
   el.className = `status status-${type}`;

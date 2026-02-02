@@ -240,67 +240,80 @@ export class WebSerialDevice {
   }
 }
 
-// XMODEM protocol implementation
+// XMODEM-1K protocol implementation (with CRC-16)
 export class XModem {
   private device: WebSerialDevice;
   
-  // XMODEM constants
-  private static readonly SOH = 0x01;  // Start of Header
+  // XMODEM-1K constants
+  private static readonly STX = 0x02;  // Start of Text (1024-byte packets)
   private static readonly EOT = 0x04;  // End of Transmission
   private static readonly ACK = 0x06;  // Acknowledge
   private static readonly NAK = 0x15;  // Negative Acknowledge
   private static readonly CAN = 0x18;  // Cancel
   private static readonly SUB = 0x1A;  // Substitute (padding)
-  private static readonly PACKET_SIZE = 128;
+  private static readonly CRC_CHAR = 0x43;  // 'C' - indicates CRC mode
+  private static readonly PACKET_SIZE_1K = 1024;
 
   constructor(device: WebSerialDevice) {
     this.device = device;
   }
 
-  private calculateChecksum(data: Uint8Array): number {
-    let sum = 0;
+  // CRC-16-CCITT calculation for XMODEM
+  private calculateCRC16(data: Uint8Array): number {
+    let crc = 0;
     for (let i = 0; i < data.length; i++) {
-      sum = (sum + data[i]) & 0xFF;
+      crc = crc ^ (data[i] << 8);
+      for (let j = 0; j < 8; j++) {
+        if (crc & 0x8000) {
+          crc = (crc << 1) ^ 0x1021;
+        } else {
+          crc = crc << 1;
+        }
+      }
     }
-    return sum;
+    return crc & 0xFFFF;
   }
 
   async send(data: string, onProgress?: (percent: number) => void): Promise<boolean> {
     const encoder = new TextEncoder();
     const fileData = encoder.encode(data);
     
-    // Pad data to multiple of 128 bytes
-    const paddedLength = Math.ceil(fileData.length / XModem.PACKET_SIZE) * XModem.PACKET_SIZE;
+    // Pad data to multiple of 1024 bytes for XMODEM-1K
+    const paddedLength = Math.ceil(fileData.length / XModem.PACKET_SIZE_1K) * XModem.PACKET_SIZE_1K;
     const paddedData = new Uint8Array(paddedLength);
     paddedData.set(fileData);
     paddedData.fill(XModem.SUB, fileData.length);
     
-    const totalPackets = paddedData.length / XModem.PACKET_SIZE;
+    const totalPackets = paddedData.length / XModem.PACKET_SIZE_1K;
     let packetNum = 1;
     let retries = 0;
     const maxRetries = 10;
     
-    // Wait for initial NAK from receiver (indicates receiver is ready)
+    // Wait for initial 'C' from receiver (indicates CRC mode ready)
     try {
       this.device.clearBuffer();
-      await this.waitForByte(XModem.NAK, 60000); // 60 second timeout for initial NAK
+      await this.waitForByte(XModem.CRC_CHAR, 60000); // 60 second timeout for initial 'C'
     } catch {
-      throw new Error('Receiver not ready (no NAK received)');
+      throw new Error('Receiver not ready (did not receive CRC mode handshake)');
     }
     
     while (packetNum <= totalPackets) {
-      const offset = (packetNum - 1) * XModem.PACKET_SIZE;
-      const packetData = paddedData.slice(offset, offset + XModem.PACKET_SIZE);
+      const offset = (packetNum - 1) * XModem.PACKET_SIZE_1K;
+      const packetData = paddedData.slice(offset, offset + XModem.PACKET_SIZE_1K);
       
-      // Build packet: SOH, packet#, ~packet#, 128 bytes data, checksum
+      // Build packet: STX, packet#, ~packet#, 1024 bytes data, CRC-16 (2 bytes)
       // Packet numbers wrap at 256 (use modulo 256)
       const wrappedPacketNum = packetNum & 0xFF;
-      const packet = new Uint8Array(XModem.PACKET_SIZE + 4);
-      packet[0] = XModem.SOH;
+      const packet = new Uint8Array(XModem.PACKET_SIZE_1K + 5);
+      packet[0] = XModem.STX;
       packet[1] = wrappedPacketNum;
       packet[2] = (255 - wrappedPacketNum) & 0xFF;
       packet.set(packetData, 3);
-      packet[XModem.PACKET_SIZE + 3] = this.calculateChecksum(packetData);
+      
+      // Calculate and append CRC-16 (high byte first)
+      const crc = this.calculateCRC16(packetData);
+      packet[XModem.PACKET_SIZE_1K + 3] = (crc >> 8) & 0xFF;
+      packet[XModem.PACKET_SIZE_1K + 4] = crc & 0xFF;
       
       await this.device.sendBytes(packet);
       
