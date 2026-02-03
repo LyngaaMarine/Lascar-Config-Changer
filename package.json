@@ -7,10 +7,8 @@
   "author": "Lyngaa Marine",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build",
-    "build:singlefile": "tsc && vite build --mode singlefile",
-    "preview": "vite preview",
-    "release:singlefile": "npm run build:singlefile"
+    "build": "tsc && vite build --mode singlefile",
+    "preview": "vite preview"
   },
   "devDependencies": {
     "typescript": "~5.9.3",
