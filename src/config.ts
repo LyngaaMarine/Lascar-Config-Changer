@@ -55,7 +55,7 @@ export const defaultConfig: ConfigData = {
   p1col: "ffff",
   blPer: "80",
   blInput: "1",
-  buInput: "0",
+  buInput: "1",
   buLabel1: "",
   buLabel2: "",
   almTxt1: "",

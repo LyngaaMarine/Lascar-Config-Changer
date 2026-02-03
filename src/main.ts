@@ -106,6 +106,12 @@ function createUI(): void {
           <h3>Input 1 Calibration</h3>
           <div class="calibration-group">
             <div class="cal-row">
+              <span class="cal-label"></span>
+              <div class="cal-label">Input 1 Value</div>
+              <div class="cal-label">Readout Value</div>
+              <div class="cal-label">Needle Position</div>
+            </div>
+            <div class="cal-row">
               <span class="cal-label">Max Input 1</span>
               <input type="number" step="0.01" id="cal1HiVoltage" value="${parseFloat(currentConfig.cal1Hi.voltage)}" placeholder="Voltage">
               <input type="number" id="cal1HiValue" value="${parseInt(currentConfig.cal1Hi.value)}" placeholder="Value">
@@ -131,6 +137,11 @@ function createUI(): void {
           <div id="cal2Section">
             <h3>Brightness Calibration</h3>
             <div class="calibration-group">
+            <div class="cal-row">
+              <span class="cal-label"></span>
+              <div class="cal-label">Input 2 Value</div>
+              <div class="cal-label">Brightness Percent</div>
+            </div>
               <div class="cal-row">
                 <span class="cal-label">Brightness High</span>
                 <input type="number" step="0.01" id="cal2HiVoltage" value="${parseFloat(currentConfig.cal2Hi.voltage)}" placeholder="Voltage">
