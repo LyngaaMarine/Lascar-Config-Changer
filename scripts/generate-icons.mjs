@@ -1,5 +1,5 @@
 import sharp from 'sharp';
-import { readFileSync } from 'fs';
+import { readFileSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
@@ -8,6 +8,16 @@ const svgPath = join(__dirname, '../public/logo.svg');
 const outputDir = join(__dirname, '../build-resources');
 
 async function generateIcons() {
+  // Check if SVG file exists
+  if (!existsSync(svgPath)) {
+    throw new Error(`Logo SVG not found at: ${svgPath}. Please ensure public/logo.svg exists.`);
+  }
+  
+  // Create output directory if it doesn't exist
+  if (!existsSync(outputDir)) {
+    mkdirSync(outputDir, { recursive: true });
+  }
+  
   const svgBuffer = readFileSync(svgPath);
   
   // Generate PNG icons in various sizes for electron-builder
