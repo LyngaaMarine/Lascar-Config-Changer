@@ -103,24 +103,24 @@ function createUI(): void {
             <input type="text" id="label1" value="${currentConfig.label1}">
           </div>
           
-          <h3>Pitch Calibration</h3>
+          <h3>Input 1 Calibration</h3>
           <div class="calibration-group">
             <div class="cal-row">
-              <span class="cal-label">Max Pitch</span>
+              <span class="cal-label">Max Input 1</span>
               <input type="number" step="0.01" id="cal1HiVoltage" value="${parseFloat(currentConfig.cal1Hi.voltage)}" placeholder="Voltage">
               <input type="number" id="cal1HiValue" value="${parseInt(currentConfig.cal1Hi.value)}" placeholder="Value">
               <input type="number" id="cal1HiPercent" value="${parseInt(currentConfig.cal1Hi.percent)}" placeholder="Percent">
               <button type="button" id="setCal1HiBtn" class="btn btn-small" disabled>Set from Input 1</button>
             </div>
             <div class="cal-row">
-              <span class="cal-label">Zero Pitch</span>
+              <span class="cal-label">Mid Input 1</span>
               <input type="number" step="0.01" id="cal1MiVoltage" value="${parseFloat(currentConfig.cal1Mi.voltage)}" placeholder="Voltage">
               <input type="number" id="cal1MiValue" value="${parseInt(currentConfig.cal1Mi.value)}" placeholder="Value">
               <input type="number" id="cal1MiPercent" value="${parseInt(currentConfig.cal1Mi.percent)}" placeholder="Percent">
               <button type="button" id="setCal1MiBtn" class="btn btn-small" disabled>Set from Input 1</button>
             </div>
             <div class="cal-row">
-              <span class="cal-label">Min Pitch</span>
+              <span class="cal-label">Min Input 1</span>
               <input type="number" step="0.01" id="cal1LoVoltage" value="${parseFloat(currentConfig.cal1Lo.voltage)}" placeholder="Voltage">
               <input type="number" id="cal1LoValue" value="${parseInt(currentConfig.cal1Lo.value)}" placeholder="Value">
               <input type="number" id="cal1LoPercent" value="${parseInt(currentConfig.cal1Lo.percent)}" placeholder="Percent">
@@ -346,64 +346,84 @@ function updateConfigFromForm(): void {
 // Returns an array of messages describing any changes made
 function validateAndFixPitchCalibration(): string[] {
   const messages: string[] = [];
-  
+
   // Get current voltage values from the form
   let maxV = parseFloat(getInputValue("cal1HiVoltage")) || 0;
   let midV = parseFloat(getInputValue("cal1MiVoltage")) || 0;
   let minV = parseFloat(getInputValue("cal1LoVoltage")) || 0;
-  
+
   // Check if all values are the same - need to fix
   if (maxV === midV && midV === minV) {
     // Spread them out slightly
     midV = maxV + VOLTAGE_ADJUSTMENT_STEP;
     minV = maxV + VOLTAGE_ADJUSTMENT_STEP * 2;
-    messages.push(`All pitch voltages were the same (${maxV}V). Adjusted: Max=${maxV}V, Mid=${midV.toFixed(2)}V, Min=${minV.toFixed(2)}V`);
+    messages.push(
+      `All pitch voltages were the same (${maxV}V). Adjusted: Max=${maxV}V, Mid=${midV.toFixed(2)}V, Min=${minV.toFixed(2)}V`,
+    );
   }
-  
+
   // Check if any two values are the same
   if (maxV === midV) {
     // Adjust mid slightly
     midV = (maxV + minV) / 2;
-    if (midV === maxV) midV = maxV + (minV > maxV ? VOLTAGE_ADJUSTMENT_STEP : -VOLTAGE_ADJUSTMENT_STEP);
-    messages.push(`Max and Mid pitch voltages were the same. Adjusted Mid to ${midV.toFixed(2)}V`);
+    if (midV === maxV)
+      midV =
+        maxV +
+        (minV > maxV ? VOLTAGE_ADJUSTMENT_STEP : -VOLTAGE_ADJUSTMENT_STEP);
+    messages.push(
+      `Max and Mid pitch voltages were the same. Adjusted Mid to ${midV.toFixed(2)}V`,
+    );
   }
   if (midV === minV) {
     // Adjust min slightly
-    minV = midV + (maxV > midV ? -VOLTAGE_ADJUSTMENT_STEP : VOLTAGE_ADJUSTMENT_STEP);
-    messages.push(`Mid and Min pitch voltages were the same. Adjusted Min to ${minV.toFixed(2)}V`);
+    minV =
+      midV + (maxV > midV ? -VOLTAGE_ADJUSTMENT_STEP : VOLTAGE_ADJUSTMENT_STEP);
+    messages.push(
+      `Mid and Min pitch voltages were the same. Adjusted Min to ${minV.toFixed(2)}V`,
+    );
   }
   if (maxV === minV && maxV !== midV) {
     // Adjust min to be consistent with the ordering
-    minV = midV + (midV > maxV ? VOLTAGE_ADJUSTMENT_STEP : -VOLTAGE_ADJUSTMENT_STEP);
-    messages.push(`Max and Min pitch voltages were the same. Adjusted Min to ${minV.toFixed(2)}V`);
+    minV =
+      midV + (midV > maxV ? VOLTAGE_ADJUSTMENT_STEP : -VOLTAGE_ADJUSTMENT_STEP);
+    messages.push(
+      `Max and Min pitch voltages were the same. Adjusted Min to ${minV.toFixed(2)}V`,
+    );
   }
-  
+
   // Determine the expected direction based on mid vs min
   // If mid > min, then max should be > mid (ascending order: min < mid < max)
   // If mid < min, then max should be < mid (descending order: min > mid > max)
   const ascending = midV > minV;
-  
+
   if (ascending) {
     // Expect: min < mid < max
     if (maxV <= midV) {
       maxV = midV + VOLTAGE_ADJUSTMENT_STEP;
-      messages.push(`Max pitch voltage adjusted to ${maxV.toFixed(2)}V (must be greater than Mid when Mid > Min)`);
+      messages.push(
+        `Max pitch voltage adjusted to ${maxV.toFixed(2)}V (must be greater than Mid when Mid > Min)`,
+      );
     }
   } else {
     // Expect: min > mid > max
     if (maxV >= midV) {
       maxV = midV - VOLTAGE_ADJUSTMENT_STEP;
-      messages.push(`Max pitch voltage adjusted to ${maxV.toFixed(2)}V (must be less than Mid when Mid < Min)`);
+      messages.push(
+        `Max pitch voltage adjusted to ${maxV.toFixed(2)}V (must be less than Mid when Mid < Min)`,
+      );
     }
   }
-  
+
   // Update the form fields if changes were made
   if (messages.length > 0) {
-    (document.getElementById("cal1HiVoltage") as HTMLInputElement).value = maxV.toFixed(2);
-    (document.getElementById("cal1MiVoltage") as HTMLInputElement).value = midV.toFixed(2);
-    (document.getElementById("cal1LoVoltage") as HTMLInputElement).value = minV.toFixed(2);
+    (document.getElementById("cal1HiVoltage") as HTMLInputElement).value =
+      maxV.toFixed(2);
+    (document.getElementById("cal1MiVoltage") as HTMLInputElement).value =
+      midV.toFixed(2);
+    (document.getElementById("cal1LoVoltage") as HTMLInputElement).value =
+      minV.toFixed(2);
   }
-  
+
   return messages;
 }
 
@@ -704,7 +724,7 @@ function setupEventListeners(): void {
     // Validate and fix pitch calibration voltages before upload
     const validationMessages = validateAndFixPitchCalibration();
     const validationBox = document.getElementById("validationStatus")!;
-    
+
     if (validationMessages.length > 0) {
       // Build validation message safely using DOM manipulation
       validationBox.textContent = "";
@@ -853,15 +873,23 @@ function setupEventListeners(): void {
   almTxtToggle.addEventListener("change", updateToggleVisibility);
 
   // Display mode toggle (voltage vs current)
-  const displayModeToggle = document.getElementById("displayModeToggle") as HTMLInputElement;
+  const displayModeToggle = document.getElementById(
+    "displayModeToggle",
+  ) as HTMLInputElement;
   displayModeToggle.addEventListener("change", () => {
     displayAsCurrent = displayModeToggle.checked;
     // Update heading
     const heading = document.getElementById("readingsHeading")!;
-    heading.textContent = displayAsCurrent ? "Current Readings" : "Voltage Readings";
+    heading.textContent = displayAsCurrent
+      ? "Current Readings"
+      : "Voltage Readings";
     // Re-read and display if we have values showing
     const rdg1Display = document.getElementById("rdg1Display")!;
-    if (rdg1Display.textContent !== "--" && rdg1Display.textContent !== "Error" && rdg1Display.textContent !== "Reading...") {
+    if (
+      rdg1Display.textContent !== "--" &&
+      rdg1Display.textContent !== "Error" &&
+      rdg1Display.textContent !== "Reading..."
+    ) {
       // Trigger a new reading to refresh the display
       document.getElementById("readVoltageBtn")?.click();
     }
@@ -876,7 +904,9 @@ function formatVoltageDisplay(reading: string): string {
   if (voltage) {
     if (displayAsCurrent) {
       // Convert voltage to milliamps
-      const current = (parseFloat(voltage) * VOLTAGE_TO_CURRENT_MULTIPLIER).toFixed(1);
+      const current = (
+        parseFloat(voltage) * VOLTAGE_TO_CURRENT_MULTIPLIER
+      ).toFixed(1);
       return `<span class="voltage-number">${current} mA</span><br><small>${reading}</small>`;
     } else {
       return `<span class="voltage-number">${voltage} V</span><br><small>${reading}</small>`;
