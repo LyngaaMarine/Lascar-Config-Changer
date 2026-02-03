@@ -494,6 +494,7 @@ h3 {
 }
 
 .toggle-slider {
+  display: block;
   position: relative;
   width: 48px;
   height: 26px;

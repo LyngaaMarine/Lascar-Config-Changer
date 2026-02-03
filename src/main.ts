@@ -41,7 +41,7 @@ function generateArcColorInputs(colors: string[]): string {
 function createUI(): void {
   document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div class="container">
-      <h1>Lascar Config Changer</h1>
+      <h1>Lascar Config Changer Revision 1</h1>
       
       <div class="section import-export-section">
         <h2>Import / Export Configuration</h2>
