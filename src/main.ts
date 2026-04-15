@@ -41,7 +41,7 @@ function generateArcColorInputs(colors: string[]): string {
 function createUI(): void {
   document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div class="container">
-      <h1>Lascar Config Changer Revision 1</h1>
+      <h1>Lascar Config Changer Revision 2</h1>
       
       <div class="section import-export-section">
         <h2>Import / Export Configuration</h2>
@@ -49,6 +49,7 @@ function createUI(): void {
           <button id="importBtn" class="btn btn-secondary">Import Config File</button>
           <button id="exportBtn" class="btn btn-secondary">Export Config File</button>
         </div>
+        Exports .txt because .cfg is blocked by browsers. You can rename it to .cfg after downloading if needed.
         <input type="file" id="importFileInput" accept=".cfg,.txt" style="display: none;">
         <div id="importStatus" class="status" style="display: none;"></div>
       </div>
@@ -248,7 +249,6 @@ function createUI(): void {
         <div id="validationStatus" class="validation-box" style="display: none;"></div>
         <div class="button-group">
           <button id="previewBtn" class="btn btn-secondary">Preview Config File</button>
-          <button id="downloadBtn" class="btn btn-secondary">Download Config File</button>
           <button id="uploadBtn" class="btn btn-primary" disabled>Upload to Device (XMODEM-1K)</button>
         </div>
         <div id="uploadProgress" class="progress-bar" style="display: none;">
@@ -713,19 +713,6 @@ function setupEventListeners(): void {
   // Close preview button
   document.getElementById("closePreviewBtn")!.addEventListener("click", () => {
     document.getElementById("previewModal")!.style.display = "none";
-  });
-
-  // Download button
-  document.getElementById("downloadBtn")!.addEventListener("click", () => {
-    updateConfigFromForm();
-    const configContent = generateConfigFile(currentConfig);
-    const blob = new Blob([configContent], { type: "text/plain" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "Configuration.txt";
-    a.click();
-    URL.revokeObjectURL(url);
   });
 
   // Upload button

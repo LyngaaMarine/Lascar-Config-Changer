@@ -1,7 +1,7 @@
 {
   "name": "lascar-config-changer",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "description": "Lascar Screen Config Changer Tool",
   "author": "Lyngaa Marine",
