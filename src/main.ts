@@ -9,6 +9,7 @@ import {
   parseVoltageFromReading,
   rgb565ToHtml,
 } from "./config";
+import logoUrl from "./Logo SVG White.svg?url";
 import { WebSerialDevice, XModem } from "./serial";
 import "./style.css";
 
@@ -41,7 +42,7 @@ function generateArcColorInputs(colors: string[]): string {
 function createUI(): void {
   document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div class="container">
-      <h1>Lascar Config Changer Revision 2</h1>
+      <h1><span>Lascar Config Changer Revision 2</span><img src="${logoUrl}" alt="Lascar logo" class="header-logo"></h1>
       
       <div class="section import-export-section">
         <h2>Import / Export Configuration</h2>
