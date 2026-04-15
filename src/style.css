@@ -37,6 +37,16 @@ h1 {
   color: #1a365d;
   margin-bottom: 1.5rem;
   text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+}
+
+.header-logo {
+  height: 1.6em;
+  width: auto;
+  filter: invert(1);
 }
 
 h2 {
@@ -390,6 +400,10 @@ h3 {
 
   h1 {
     color: #90cdf4;
+  }
+
+  .header-logo {
+    filter: none;
   }
 
   h2 {
